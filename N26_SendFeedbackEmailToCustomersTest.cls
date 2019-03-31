@@ -43,6 +43,7 @@ public class N26_SendFeedbackEmailToCustomersTest{
         String CRON_EXP = '0 '+ dt.minute() + ' * ' + dt.day() + ' ' + dt.month() + ' ? ' + dt.year();        
         String jobId = System.schedule('Schedule Batch For Sending Emails to Customers', CRON_EXP,new N26_SendFeedbackEmailToCustomers ());         
         Test.stopTest();
-        List<Contact> listOfTotalcontacts =[SELECT id from Contact WHERE Survey_date__c=null];      
+        List<Contact> listOfTotalcontacts =[SELECT id from Contact WHERE Survey_date__c=null];  
+         
     }
 }

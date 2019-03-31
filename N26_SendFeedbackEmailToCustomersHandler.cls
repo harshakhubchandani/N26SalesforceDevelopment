@@ -18,11 +18,13 @@ public without sharing class N26_SendFeedbackEmailToCustomersHandler{
         Map<String,String> mapOfMetadata = new Map<String,String>();
         List<Contact> listOfContactsToBeUpdated = new List<Contact> ();
         List<Messaging.SendEmailResult> results = new List<Messaging.SendEmailResult>();
-        Map<Id,Contact> mapOfContacts = new Map<Id,Contact>(scope); 
+        
+        /************************ Creating a map of contacts *******************************************************************************/
+        Map<Id,Contact> mapOfContacts = new Map<Id,Contact>(scope);
         
         List<N26_EmailConfiguration__mdt> listOfMetdataNames = [SELECT Id,MasterLabel,N26_EmailBody__c FROM N26_EmailConfiguration__mdt];
         
-        /*** Creating a map of Languages and its corresponding email body ******************************************************************/
+        /*********************** Creating a map of Languages and its corresponding email body **********************************************/
         if(! listOfMetdataNames.isEmpty()){
             for(N26_EmailConfiguration__mdt customMtadta :listOfMetdataNames ){
                 mapOfMetadata.put(customMtadta.MasterLabel,customMtadta.N26_EmailBody__c);
@@ -31,31 +33,39 @@ public without sharing class N26_SendFeedbackEmailToCustomersHandler{
         
         if(!scope.isEmpty()){
             for(Contact con : scope){
-                Messaging.SingleEmailMessage feedbackEmail= new Messaging.SingleEmailMessage();                
+                Messaging.SingleEmailMessage feedbackEmail= new Messaging.SingleEmailMessage();
                 feedbackEmail.toAddresses = new String[]{con.Email}; 
+                feedbackEmail.setTargetObjectId(con.Id);
                 feedbackEmail.subject = 'Please tell us about your experience';
                 if(con.Language__c !=null && mapOfMetadata.containsKey(con.Language__c)){
-                    String emailBody = 'Hey '+ con.Firstname +'\n '+mapOfMetadata.get(con.Language__c)+con.Id;
+                    String emailBody = 'Hey '+ con.Firstname +',<br> '+mapOfMetadata.get(con.Language__c)+con.Id;
                     feedbackEmail.setHtmlBody(emailBody ); 
                 }
                 listOfEmail.add(feedbackEmail);                
             }       
         }
         
-        if(Limits.getEmailInvocations() < Limits.getLimitEmailInvocations() && !listOfEmail.isEmpty()){
-            results = Messaging.sendEmail( listOfEmail );
-        }   
-        System.debug('You have made ' + Limits.getEmailInvocations() + ' email calls out of ' + Limits.getLimitEmailInvocations() 
-                    + ' allowed');                    
-       
-        for(Messaging.SendEmailResult msgresult : results){
-            if(!msgresult.Issuccess() && mapOfContacts.containsKey(msgresult.getErrors()[0].getTargetObjectId())){
-                mapOfContacts.remove(msgresult.getErrors()[0].getTargetObjectId());
-            }        
-        }
+        /**************************** Allowing partial email send by setting the "AllorNone" option to false*******************************/
+        if(!listOfEmail.isEmpty()){
+            results = Messaging.sendEmail(listOfEmail,false);
+        } 
         
-        system.debug(mapOfContacts+'======>>> mapOfContacts');
-        if(! mapOfContacts.isEmpty()){
+        /***********************************************************************************************************************************
+        @description : Checking if there are any errors while sending the emails..If there are, remove the record from the mapOfContacts.
+                        This has been done to get the list of contacts for which the email was sent successfully.
+        ***********************************************************************************************************************************/
+        if(!results.isEmpty()){
+            for(Messaging.SendEmailResult msgresult : results){                
+                if(!msgresult.Issuccess() && mapOfContacts.containsKey(msgresult.getErrors()[0].getTargetObjectId())){
+                    mapOfContacts.remove(msgresult.getErrors()[0].getTargetObjectId());
+                }             
+            }
+        }    
+        
+        /***********************************************************************************************************************************
+        @description : The list of records for which the email was sent successfully are updated (Survey date is set to null).
+        ***********************************************************************************************************************************/
+        if(!mapOfContacts.isEmpty()){
             for(Contact contactToBeUpdated : mapOfContacts.values()){
                 contactToBeUpdated.Survey_date__c=null;
             }           
