@@ -8,7 +8,7 @@ public without sharing class N26_SendFeedbackEmailToCustomersHandler{
     /***************************************************************************************************************************************
     * @author   Harsha Khubchandani
     * @date     29-03-2019
-    * @description  - This method will send the emails to the customers.Currently we have only languages but we have made the email body
+    * @description  - This method will send the emails to the customers.Currently we have only two languages but we have made the email body
                     configurable based on the language.
                     --> N26_EmailConfiguration__mdt Custom metadata type will store the email body against the Language code (ISO 639-1)
     * param scope : List of Contacts
