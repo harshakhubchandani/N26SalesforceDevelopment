@@ -1,12 +1,11 @@
-<aura:component implements="flexipage:availableForAllPageTypes,force:hasRecordId"
-                controller="N26_CustomerProductInformation">
+<aura:component implements="flexipage:availableForAllPageTypes,force:hasRecordId">
     
     <!-- Defining attributes to store data --> 
     <aura:attribute name="caseDetails" type="Case" />
 	<aura:attribute name="hasProduct" type="String" default="no" />
     <aura:attribute name="recordError" type="String"/>
     
-    <!-- Using LDS(Lighning Data Service to load the record details-->
+    <!-- Using LDS(Lighning Data Service) to load the record details-->
     <force:recordData aura:id="recordLoader"
       recordId="{!v.recordId}"
       recordUpdated="{!c.handleRecordLoading}"
