@@ -1,0 +1,65 @@
+<aura:component implements="flexipage:availableForAllPageTypes,force:hasRecordId"
+                controller="N26_CustomerProductInformation">
+    
+    <!-- Defining attributes to store data --> 
+    <aura:attribute name="caseDetails" type="Case" />
+	<aura:attribute name="hasProduct" type="String" default="no" />
+    <aura:attribute name="recordError" type="String"/>
+    
+    <!-- Using LDS(Lighning Data Service to load the record details-->
+    <force:recordData aura:id="recordLoader"
+      recordId="{!v.recordId}"
+      recordUpdated="{!c.handleRecordLoading}"
+	  fields="Contact.Product__r.Type__c,Contact.Product__r.Value__c,Contact.Product__r.Product__c,Contact.Home_Country__c"
+      layoutType="FULL"
+      targetFields="{!v.caseDetails}"
+      targetError="{!v.recordError}"
+      />
+    
+    <!-- Display the details of the record -->
+    <div class="slds-m-around_medium slds-box slds-theme_shade slds-theme_alert-texture">
+        <div class="slds-form-element">
+            <p><strong> Customer ( {!v.caseDetails.Contact.Name} ) has {!v.hasProduct} product associated with it.
+                Below are the details of the product</strong></p>
+        </div>
+		<div class="slds-grid slds-wrap">
+			<aura:if isTrue="{!v.hasProduct != 'no'}">
+				<div class="slds-size_1-of-2 slds-form-element">
+					<label class="slds-form-element__label heading" for="recordName">Type : </label>
+					<div class="slds-form-element__control">
+					  <ui:outputText class="slds-output" aura:id="recordName"
+						value="{!v.caseDetails.Contact.Product__r.Type__c}" />
+					</div>
+				</div>
+				<div class="slds-size_1-of-2 slds-form-element">
+					<label class="slds-form-element__label heading" for="recordName">Product Name: </label>
+					<div class="slds-form-element__control">
+					  <ui:outputText class="slds-output" aura:id="recordName"
+						value="{!v.caseDetails.Contact.Product__r.Product__c}" />
+					</div>
+				</div>
+				<div class="slds-size_1-of-2 slds-form-element">
+					<label class="slds-form-element__label heading" for="recordName">Home Country: </label>
+					<div class="slds-form-element__control">
+					  <ui:outputText class="slds-output" aura:id="recordName"
+						value="{!v.caseDetails.Contact.Home_Country__c}" />
+					</div>
+				</div>
+				
+				<div class="slds-size_1-of-2 slds-form-element">
+					<label class="slds-form-element__label heading" for="recordName">Value : </label>
+					<div class="slds-form-element__control">
+					  <ui:outputText class="slds-output" aura:id="recordName"
+						value="{!v.caseDetails.Contact.Product__r.Value__c}" />
+					</div>
+				</div>
+			</aura:if>
+		</div>	
+    </div>
+    
+    <!-- Display Lightning Data Service errors, if any -->
+    <aura:if isTrue="{!not(empty(v.recordError))}">
+        <div class="recordError">
+            {!v.recordError}</div>
+    </aura:if>
+</aura:component>
